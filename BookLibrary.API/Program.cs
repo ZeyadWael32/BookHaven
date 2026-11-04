@@ -1,10 +1,10 @@
-using BookLibrary.API;
-using BookLibrary.API.Data;
-using BookLibrary.API.Exceptions;
-using BookLibrary.API.Repository;
-using BookLibrary.API.Repository.IRepository;
-using BookLibrary.API.Services;
-using BookLibrary.API.Services.IServices;
+using BookHaven.API;
+using BookHaven.API.Data;
+using BookHaven.API.Exceptions;
+using BookHaven.API.Repository;
+using BookHaven.API.Repository.IRepository;
+using BookHaven.API.Services;
+using BookHaven.API.Services.IServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

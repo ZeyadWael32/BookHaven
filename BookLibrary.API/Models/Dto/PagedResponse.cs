@@ -1,4 +1,4 @@
-﻿namespace BookLibrary.API.Models.Dto;
+﻿namespace BookHaven.API.Models.Dto;
 
 public class PagedResponse<T>
 {

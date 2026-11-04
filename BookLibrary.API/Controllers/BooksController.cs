@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
-using BookLibrary.API.Models;
-using BookLibrary.API.Models.Dto;
-using BookLibrary.API.Models.Queries;
-using BookLibrary.API.Repository.IRepository;
-using BookLibrary.API.Services.IServices;
+using BookHaven.API.Models;
+using BookHaven.API.Models.Dto;
+using BookHaven.API.Models.Queries;
+using BookHaven.API.Repository.IRepository;
+using BookHaven.API.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BookLibrary.API.Controllers;
+namespace BookHaven.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -21,6 +21,7 @@ public class BooksController : ApiControllerBase
 
     [HttpGet]
     [AllowAnonymous]
+    [ResponseCache(CacheProfileName = "Default30")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -32,7 +33,6 @@ public class BooksController : ApiControllerBase
 
     [HttpGet("{id:int}", Name = "GetBook")]
     [AllowAnonymous]
-    [ResponseCache(CacheProfileName = "Default30")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

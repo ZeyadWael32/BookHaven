@@ -1,4 +1,4 @@
-﻿namespace BookLibrary.API.Models
+﻿namespace BookHaven.API.Models
 {
     public class Category
     {

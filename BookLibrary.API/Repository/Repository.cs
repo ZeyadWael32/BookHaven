@@ -1,9 +1,9 @@
-﻿using BookLibrary.API.Data;
-using BookLibrary.API.Repository.IRepository;
+﻿using BookHaven.API.Data;
+using BookHaven.API.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace BookLibrary.API.Repository;
+namespace BookHaven.API.Repository;
 
 public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : class
 {

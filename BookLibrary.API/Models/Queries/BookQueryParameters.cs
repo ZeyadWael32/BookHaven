@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BookLibrary.API.Models.Queries;
+namespace BookHaven.API.Models.Queries;
 
 public class BookQueryParameters : IValidatableObject
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BookLibrary.API.Exceptions;
+namespace BookHaven.API.Exceptions;
 
 public sealed class GlobalExceptionHandler : IExceptionHandler
 {

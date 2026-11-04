@@ -1,7 +1,7 @@
-﻿using BookLibrary.API.Models.Dto;
-using BookLibrary.API.Models.Queries;
+﻿using BookHaven.API.Models.Dto;
+using BookHaven.API.Models.Queries;
 
-namespace BookLibrary.API.Services.IServices;
+namespace BookHaven.API.Services.IServices;
 
 public interface IBookService
 {

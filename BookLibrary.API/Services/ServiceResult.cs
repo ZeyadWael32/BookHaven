@@ -1,4 +1,4 @@
-﻿namespace BookLibrary.API.Services;
+﻿namespace BookHaven.API.Services;
 
 public class ServiceResult<T>
 {

@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
-using BookLibrary.API.Models;
-using BookLibrary.API.Models.Dto;
-using BookLibrary.API.Models.Queries;
-using BookLibrary.API.Repository;
-using BookLibrary.API.Repository.IRepository;
-using BookLibrary.API.Services.IServices;
+using BookHaven.API.Models;
+using BookHaven.API.Models.Dto;
+using BookHaven.API.Models.Queries;
+using BookHaven.API.Repository.IRepository;
+using BookHaven.API.Services.IServices;
 
-namespace BookLibrary.API.Services;
+namespace BookHaven.API.Services;
 
 public class BookService : IBookService
 {

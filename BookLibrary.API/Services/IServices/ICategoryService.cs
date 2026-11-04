@@ -1,6 +1,6 @@
-﻿using BookLibrary.API.Models.Dto;
+﻿using BookHaven.API.Models.Dto;
 
-namespace BookLibrary.API.Services.IServices;
+namespace BookHaven.API.Services.IServices;
 
 public interface ICategoryService
 {

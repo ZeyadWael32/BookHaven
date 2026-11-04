@@ -1,7 +1,7 @@
-﻿using BookLibrary.API.Services;
+﻿using BookHaven.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BookLibrary.API.Controllers;
+namespace BookHaven.API.Controllers;
 
 public abstract class ApiControllerBase : ControllerBase
 {
@@ -11,7 +11,7 @@ public abstract class ApiControllerBase : ControllerBase
         {
             ServiceErrorType.NotFound => StatusCodes.Status404NotFound,
             ServiceErrorType.Conflict => StatusCodes.Status409Conflict,
-            _ => StatusCodes.Status400BadRequest
+            _ => StatusCodes.Status400BadRequest // Default to bad request
         };
 
         return StatusCode(status, new ProblemDetails

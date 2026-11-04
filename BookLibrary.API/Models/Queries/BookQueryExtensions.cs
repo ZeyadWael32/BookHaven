@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace BookLibrary.API.Models.Queries;
+namespace BookHaven.API.Models.Queries;
 
 public static class BookQueryExtensions
 {

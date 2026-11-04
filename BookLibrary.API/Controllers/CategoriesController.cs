@@ -1,10 +1,10 @@
-﻿using BookLibrary.API.Models.Dto;
-using BookLibrary.API.Services.IServices;
+﻿using BookHaven.API.Models.Dto;
+using BookHaven.API.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
-namespace BookLibrary.API.Controllers;
+namespace BookHaven.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -19,6 +19,7 @@ public class CategoriesController : ApiControllerBase
 
     [HttpGet]
     [AllowAnonymous]
+    [ResponseCache(CacheProfileName = "Default30")]
     [ProducesResponseType(typeof(PagedResponse<CategoryDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -33,7 +34,6 @@ public class CategoriesController : ApiControllerBase
 
     [HttpGet("{id:int}", Name = "GetCategory")]
     [AllowAnonymous]
-    [ResponseCache(CacheProfileName = "Default30")]
     [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

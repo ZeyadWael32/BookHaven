@@ -1,6 +1,6 @@
-﻿using BookLibrary.API.Models;
+﻿using BookHaven.API.Models;
 
-namespace BookLibrary.API.Repository.IRepository;
+namespace BookHaven.API.Repository.IRepository;
 
 public interface IBookRepository : IRepository<Book, int>
 {

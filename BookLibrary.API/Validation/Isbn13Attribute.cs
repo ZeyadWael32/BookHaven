@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BookLibrary.API.Validation;
+namespace BookHaven.API.Validation;
 
 public class Isbn13Attribute : ValidationAttribute
 {

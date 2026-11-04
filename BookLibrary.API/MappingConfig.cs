@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using BookLibrary.API.Models;
-using BookLibrary.API.Models.Dto;
+using BookHaven.API.Models;
+using BookHaven.API.Models.Dto;
 
-namespace BookLibrary.API
+namespace BookHaven.API
 {
     public class MappingConfig : Profile
     {

@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace BookLibrary.API.Repository.IRepository;
+namespace BookHaven.API.Repository.IRepository;
 
 public interface IRepository<TEntity, TKey> where TEntity : class
 {

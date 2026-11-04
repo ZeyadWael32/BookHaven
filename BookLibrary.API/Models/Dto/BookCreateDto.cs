@@ -1,7 +1,7 @@
-﻿using BookLibrary.API.Validation;
+﻿using BookHaven.API.Validation;
 using System.ComponentModel.DataAnnotations;
 
-namespace BookLibrary.API.Models.Dto;
+namespace BookHaven.API.Models.Dto;
 
 public class BookCreateDto
 {

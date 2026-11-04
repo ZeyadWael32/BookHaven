@@ -1,9 +1,9 @@
-﻿using BookLibrary.API.Data;
-using BookLibrary.API.Models;
-using BookLibrary.API.Repository.IRepository;
+﻿using BookHaven.API.Data;
+using BookHaven.API.Models;
+using BookHaven.API.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 
-namespace BookLibrary.API.Repository;
+namespace BookHaven.API.Repository;
 
 public class CategoryRepository : Repository<Category, int>, ICategoryRepository
 {

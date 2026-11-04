@@ -1,7 +1,7 @@
-﻿using BookLibrary.API.Models;
+﻿using BookHaven.API.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BookLibrary.API.Data;
+namespace BookHaven.API.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {

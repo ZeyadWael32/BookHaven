@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace BookLibrary.API.Migrations
+namespace BookHaven.API.Migrations
 {
     /// <inheritdoc />
     public partial class AddUniqueCategoryName : Migration
