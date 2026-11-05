@@ -9,7 +9,8 @@ public static class BookQueryExtensions
         var term = string.IsNullOrWhiteSpace(parameters.SearchTerm) ? null : parameters.SearchTerm.Trim();
 
         return book =>
-            (term == null || book.Title.Contains(term) || book.Author.Contains(term)) &&
+            (term == null || book.Title.Contains(term)) &&
+            (parameters.AuthorId == null || book.AuthorId == parameters.AuthorId) &&
             (parameters.CategoryId == null || book.CategoryId == parameters.CategoryId) &&
             (parameters.PublishedYearFrom == null || book.PublishedYear >= parameters.PublishedYearFrom) &&
             (parameters.PublishedYearTo == null || book.PublishedYear <= parameters.PublishedYearTo);

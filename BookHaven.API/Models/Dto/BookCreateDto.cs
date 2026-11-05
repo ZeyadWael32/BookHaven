@@ -8,17 +8,20 @@ public class BookCreateDto
     [Required]
     [StringLength(200)]
     public string Title { get; set; } = string.Empty;
-    [Required]
-    [StringLength(150)]
-    public string Author { get; set; } = string.Empty;
+    [Range(1, int.MaxValue, ErrorMessage = "AuthorId must be a positive integer.")]
+    public int AuthorId { get; set; }
     [Required]
     [Isbn13]
     public string Isbn { get; set; } = string.Empty;
     [Range(1450, 2100, ErrorMessage = "Published year must be between 1450 and 2100.")]
     public int PublishedYear { get; set; }
-    [Required]
     [Range(1, int.MaxValue, ErrorMessage = "CategoryId must be a positive integer.")]
     public int CategoryId { get; set; }
     [StringLength(2000)]
     public string? Description { get; set; }
+    [StringLength(500)]
+    public string? CoverImageUrl { get; set; }
+    public IFormFile? CoverImage { get; set; }
+    [Range(0.01, double.MaxValue, ErrorMessage = "Price must be a positive number.")]
+    public decimal Price { get; set; }
 }

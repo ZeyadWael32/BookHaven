@@ -5,6 +5,7 @@ namespace BookHaven.API.Models.Queries;
 public class BookQueryParameters : IValidatableObject
 {
     public string? SearchTerm { get; set; }
+    public int? AuthorId { get; set; }
     public int? CategoryId { get; set; }
 
     [Range(1, 9999)] public int? PublishedYearFrom { get; set; }
