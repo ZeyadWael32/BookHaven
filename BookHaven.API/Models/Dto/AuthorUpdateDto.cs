@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BookHaven.API.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace BookHaven.API.Models.Dto;
 
@@ -13,5 +14,6 @@ public class AuthorUpdateDto
     public string? ProfileImageUrl { get; set; }
     [StringLength(500, ErrorMessage = "Local image path cannot exceed 500 characters.")]
     public string? ImageLocalPath { get; set; }
+    [ImageValidation(ErrorMessage = "Image must be a valid image file (jpg, jpeg, png) and cannot exceed 5MB.")]
     public IFormFile? ProfileImage { get; set; }
 }
