@@ -31,7 +31,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                   .HasForeignKey(b => b.CategoryId)
                   .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of a category if it has associated books
 
-            entity.HasOne(b => b.Author)
+            entity.HasOne(b => b.Authors)
                   .WithMany(a => a.Books)
                   .HasForeignKey(b => b.AuthorId)
                   .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of an author if they have associated books

@@ -51,7 +51,7 @@ namespace BookHaven.API.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Author");
+                    b.ToTable("Authors");
                 });
 
             modelBuilder.Entity("BookHaven.API.Models.Book", b =>
@@ -132,7 +132,7 @@ namespace BookHaven.API.Migrations
 
             modelBuilder.Entity("BookHaven.API.Models.Book", b =>
                 {
-                    b.HasOne("BookHaven.API.Models.Author", "Author")
+                    b.HasOne("BookHaven.API.Models.Author", "Authors")
                         .WithMany("Books")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -144,7 +144,7 @@ namespace BookHaven.API.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Author");
+                    b.Navigation("Authors");
 
                     b.Navigation("Category");
                 });

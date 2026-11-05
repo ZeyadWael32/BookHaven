@@ -12,7 +12,7 @@ public class AuthorRepository : Repository<Author, int>, IAuthorRepository
         _db = db;
     }
 
-    public async Task UpdateAsync(Author entity, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(Author entity, CancellationToken cancellationToken = default)
     {
         _db.Authors.Update(entity);
         return Task.CompletedTask;

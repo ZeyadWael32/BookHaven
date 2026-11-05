@@ -10,7 +10,7 @@ namespace BookHaven.API
         {
             CreateMap<Book, BookDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.Name))
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Authors.Name))
                 .ReverseMap();
 
             CreateMap<Book, BookCreateDto>().ReverseMap();
