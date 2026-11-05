@@ -28,6 +28,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddResponseCaching();
 
+// Unit of Work
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 // Repositories
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -106,12 +109,15 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Exception handling
-builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails(); // Adds support for RFC 7807 Problem Details responses.
 
 var app = builder.Build();
 
 // Exception handling middleware
+//if (app.Environment.IsDevelopment())
+//    app.UseDeveloperExceptionPage();
+
 app.UseExceptionHandler();
 
 // Swagger and Scalar (development only)

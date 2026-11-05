@@ -17,6 +17,7 @@ public class BookQueryParameters : IValidatableObject
     {
         if (PublishedYearFrom.HasValue && PublishedYearTo.HasValue && PublishedYearFrom > PublishedYearTo)
         {
+            // yield is used to return each iteration of ValidationResult one at a time, allowing for deferred execution and efficient memory usage.
             yield return new ValidationResult(
                 "PublishedYearFrom cannot be greater than PublishedYearTo.",
                 new[] { nameof(PublishedYearFrom), nameof(PublishedYearTo) });
