@@ -47,6 +47,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(e => e.Name).IsRequired().HasMaxLength(150);
             entity.Property(e => e.Biography).HasMaxLength(2000);
             entity.Property(e => e.ProfileImageUrl).HasMaxLength(500);
+            entity.Property(e => e.ImageLocalPath).HasMaxLength(500);
             entity.HasIndex(e => e.Name).IsUnique();
         });
     }

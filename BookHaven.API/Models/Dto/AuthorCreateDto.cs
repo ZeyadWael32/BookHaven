@@ -11,4 +11,5 @@ public class AuthorCreateDto
     public string? Biography { get; set; }
     [StringLength(500, ErrorMessage = "Profile image URL cannot exceed 500 characters.")]
     public string? ProfileImageUrl { get; set; }
+    public IFormFile? ProfileImage { get; set; }
 }
