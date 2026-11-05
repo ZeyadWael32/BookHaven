@@ -7,6 +7,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<Book> Books { get; set; } = null!;
     public DbSet<Category> Categories { get; set; } = null!;
+    public DbSet<Author> Authors { get; set; } = null!;
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

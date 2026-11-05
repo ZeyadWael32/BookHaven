@@ -13,10 +13,10 @@ public class CategoryRepository : Repository<Category, int>, ICategoryRepository
         _db = db;
     }
 
-    public async Task UpdateAsync(Category entity, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(Category entity, CancellationToken cancellationToken = default)
     {
         _db.Categories.Update(entity);
-        await _db.SaveChangesAsync(cancellationToken);
+        return Task.CompletedTask;
     }
 
     public async Task<bool> NameExistsAsync(string name, int? excludeId = null, CancellationToken cancellationToken = default)

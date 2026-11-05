@@ -57,7 +57,7 @@ public class CategoryService : ICategoryService
 
         var category = _mapper.Map<Category>(createDto);
         await _unitOfWork.Categories.CreateAsync(category, cancellationToken);
-
+        await _unitOfWork.SaveAsync(cancellationToken);
         var created = await _unitOfWork.Categories.GetAsync(
             c => c.Id == category.Id, tracked: false, cancellationToken: cancellationToken);
 
@@ -84,7 +84,7 @@ public class CategoryService : ICategoryService
 
         _mapper.Map(updateDto, category);
         await _unitOfWork.Categories.UpdateAsync(category, cancellationToken);
-
+        await _unitOfWork.SaveAsync(cancellationToken);
         var updated = await _unitOfWork.Categories.GetAsync(
             c => c.Id == category.Id, tracked: false, cancellationToken: cancellationToken);
 
@@ -109,6 +109,7 @@ public class CategoryService : ICategoryService
                 "Cannot delete a category that has associated books.");
 
         await _unitOfWork.Categories.RemoveAsync(category, cancellationToken);
+        await _unitOfWork.SaveAsync(cancellationToken);
 
         return ServiceResult<bool>.Success(true);
     }

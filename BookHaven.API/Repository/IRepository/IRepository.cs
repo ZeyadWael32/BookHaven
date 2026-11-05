@@ -10,6 +10,5 @@ public interface IRepository<TEntity, TKey> where TEntity : class
     Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>>? filter = null, bool tracked = true, string? includeProperties = null, CancellationToken cancellationToken = default);
     Task CreateAsync(TEntity entity, CancellationToken cancellationToken = default);
     Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default);
-    Task SaveAsync(CancellationToken cancellationToken = default);
     Task<int> CountAsync(Expression<Func<TEntity, bool>>? filter = null, CancellationToken cancellationToken = default);
 }

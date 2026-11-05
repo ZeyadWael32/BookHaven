@@ -4,6 +4,7 @@ public interface IUnitOfWork
 {
     IBookRepository Books { get; }
     ICategoryRepository Categories { get; }
+    IAuthorRepository Authors { get; }
 
-    Task<int> SaveAsync(); // returns the number of state entries written to the database (int)
+    Task<int> SaveAsync(CancellationToken cancellationToken = default); // returns the number of state entries written to the database (int)
 }

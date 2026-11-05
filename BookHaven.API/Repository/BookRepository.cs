@@ -13,10 +13,10 @@ public class BookRepository : Repository<Book, int>, IBookRepository
         _db = db;
     }
 
-    public async Task UpdateAsync(Book entity, CancellationToken cancellationToken = default)
+    public Task UpdateAsync(Book entity, CancellationToken cancellationToken = default)
     {
         _db.Books.Update(entity);
-        await _db.SaveChangesAsync(cancellationToken);
+        return Task.CompletedTask;
     }
 
     public async Task<bool> IsbnExistsAsync(string isbn, int? excludeId = null, CancellationToken cancellationToken = default)

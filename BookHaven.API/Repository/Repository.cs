@@ -17,13 +17,12 @@ public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntit
     public async Task CreateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         await dbSet.AddAsync(entity, cancellationToken);
-        await SaveAsync(cancellationToken);
     }
 
-    public async Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public Task RemoveAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         dbSet.Remove(entity);
-        await SaveAsync(cancellationToken);
+        return Task.CompletedTask;
     }
 
     public async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>>? filter = null, bool tracked = false, string? includeProperties = null, CancellationToken cancellationToken = default,
@@ -77,11 +76,6 @@ public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntit
     public async Task<TEntity?> GetByIdAsync(TKey id, CancellationToken cancellationToken = default)
     {
         return await dbSet.FindAsync(new object?[] { id }, cancellationToken);
-    }
-
-    public async Task SaveAsync(CancellationToken cancellationToken = default)
-    {
-        await _db.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<int> CountAsync(Expression<Func<TEntity, bool>>? filter = null, CancellationToken cancellationToken = default)

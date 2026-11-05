@@ -25,7 +25,7 @@ public class BookService : IBookService
         var books = await _unitOfWork.Books.GetAllAsync(
             filter: filter,
             tracked: false,
-            includeProperties: "Category",
+            includeProperties: "Author,Category",
             cancellationToken: cancellationToken,
             pageSize: query.PageSize,
             pageNumber: query.PageNumber);
@@ -44,7 +44,7 @@ public class BookService : IBookService
 
     public async Task<BookDto?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        var book = await _unitOfWork.Books.GetAsync(u => u.Id == id, tracked: false, includeProperties: "Category", cancellationToken: cancellationToken);
+        var book = await _unitOfWork.Books.GetAsync(u => u.Id == id, tracked: false, includeProperties: "Author,Category", cancellationToken: cancellationToken);
         
         return book is null ? null : _mapper.Map<BookDto>(book);
     }
@@ -54,9 +54,16 @@ public class BookService : IBookService
         var category = await _unitOfWork.Categories.GetAsync(
             c => c.Id == createDto.CategoryId, tracked: false, cancellationToken: cancellationToken);
 
+        var author = await _unitOfWork.Authors.GetAsync(
+            a => a.Id == createDto.AuthorId, tracked: false, cancellationToken: cancellationToken);
+
         if (category is null)
             return ServiceResult<BookDto>.Failure(
                 ServiceErrorType.Validation, "Invalid category", "The provided category ID is invalid.");
+
+        if (author is null)
+            return ServiceResult<BookDto>.Failure(
+                ServiceErrorType.Validation, "Invalid author", "The provided author ID is invalid.");
 
         if (await _unitOfWork.Books.IsbnExistsAsync(createDto.Isbn, cancellationToken: cancellationToken))
             return ServiceResult<BookDto>.Failure(
@@ -64,16 +71,17 @@ public class BookService : IBookService
 
         var book = _mapper.Map<Book>(createDto);
         await _unitOfWork.Books.CreateAsync(book, cancellationToken);
+        await _unitOfWork.SaveAsync(cancellationToken);
 
         var created = await _unitOfWork.Books.GetAsync(
-            b => b.Id == book.Id, tracked: false, includeProperties: "Category", cancellationToken: cancellationToken);
+            b => b.Id == book.Id, tracked: false, includeProperties: "Author,Category", cancellationToken: cancellationToken);
 
         return ServiceResult<BookDto>.Success(_mapper.Map<BookDto>(created));
     }
 
     public async Task<ServiceResult<BookDto>> UpdateAsync(int id, BookUpdateDto updateDto, CancellationToken cancellationToken)
     {
-        var bookToUpdate = await _unitOfWork.Books.GetAsync(u => u.Id == id, tracked: true, includeProperties: "Category", cancellationToken: cancellationToken);
+        var bookToUpdate = await _unitOfWork.Books.GetAsync(u => u.Id == id, tracked: true, includeProperties: "Author,Category", cancellationToken: cancellationToken);
 
         if (bookToUpdate is null)
             return ServiceResult<BookDto>.Failure(
@@ -81,9 +89,15 @@ public class BookService : IBookService
 
         var category = await _unitOfWork.Categories.GetAsync(c => c.Id == updateDto.CategoryId, tracked: false, cancellationToken: cancellationToken);
 
+        var author = await _unitOfWork.Authors.GetAsync(a => a.Id == updateDto.AuthorId, tracked: false, cancellationToken: cancellationToken);
+
         if (category is null)
             return ServiceResult<BookDto>.Failure(
                 ServiceErrorType.Validation, "Invalid category", "The provided category ID is invalid.");
+
+        if (author is null)
+            return ServiceResult<BookDto>.Failure(
+                ServiceErrorType.Validation, "Invalid author", "The provided author ID is invalid.");
 
         if (await _unitOfWork.Books.IsbnExistsAsync(updateDto.Isbn, excludeId: id, cancellationToken: cancellationToken))
             return ServiceResult<BookDto>.Failure(
@@ -91,8 +105,9 @@ public class BookService : IBookService
 
         _mapper.Map(updateDto, bookToUpdate); // Map the updateDto to the existing book entity
         await _unitOfWork.Books.UpdateAsync(bookToUpdate, cancellationToken);
+        await _unitOfWork.SaveAsync(cancellationToken);
         var updated = await _unitOfWork.Books.GetAsync(
-            b => b.Id == bookToUpdate.Id, tracked: false, includeProperties: "Category", cancellationToken: cancellationToken);
+            b => b.Id == bookToUpdate.Id, tracked: false, includeProperties: "Author,Category", cancellationToken: cancellationToken);
         return ServiceResult<BookDto>.Success(_mapper.Map<BookDto>(updated));
     }
 
@@ -105,6 +120,7 @@ public class BookService : IBookService
                 ServiceErrorType.NotFound, "Book not found", "The book with the provided ID does not exist.");
 
         await _unitOfWork.Books.RemoveAsync(bookToDelete, cancellationToken);
+        await _unitOfWork.SaveAsync(cancellationToken);
         return ServiceResult<bool>.Success(true);
     }
 }
