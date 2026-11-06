@@ -10,19 +10,25 @@ namespace BookHaven.API
         {
             CreateMap<Book, BookDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Authors.Name))
-                .ReverseMap();
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.Name));
 
-            CreateMap<Book, BookCreateDto>().ReverseMap();
-            CreateMap<Book, BookUpdateDto>().ReverseMap();
+            CreateMap<BookCreateDto, Book>()
+                .ForMember(dest => dest.CoverImageUrl, opt => opt.Ignore())
+                .ForMember(dest => dest.Category, opt => opt.Ignore())
+                .ForMember(dest => dest.Author, opt => opt.Ignore());
 
-            CreateMap<Category, CategoryDto>().ReverseMap();
-            CreateMap<Category, CategoryCreateDto>().ReverseMap();
-            CreateMap<Category, CategoryUpdateDto>().ReverseMap();
+            CreateMap<BookUpdateDto, Book>()
+                .ForMember(dest => dest.CoverImageUrl, opt => opt.Ignore())
+                .ForMember(dest => dest.Category, opt => opt.Ignore())
+                .ForMember(dest => dest.Author, opt => opt.Ignore());
 
-            CreateMap<Author, AuthorDto>().ReverseMap();
-            CreateMap<Author, AuthorCreateDto>().ReverseMap();
-            CreateMap<Author, AuthorUpdateDto>().ReverseMap();
+            CreateMap<Category, CategoryDto>();
+            CreateMap<CategoryCreateDto, Category>();
+            CreateMap<CategoryUpdateDto, Category>();
+
+            CreateMap<Author, AuthorDto>();
+            CreateMap<AuthorCreateDto, Author>();
+            CreateMap<AuthorUpdateDto, Author>();
         }
     }
 }

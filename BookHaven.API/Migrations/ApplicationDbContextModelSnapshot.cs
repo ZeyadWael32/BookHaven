@@ -76,10 +76,6 @@ namespace BookHaven.API.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<string>("ImageLocalPath")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<string>("Isbn")
                         .IsRequired()
                         .HasMaxLength(13)
@@ -132,7 +128,7 @@ namespace BookHaven.API.Migrations
 
             modelBuilder.Entity("BookHaven.API.Models.Book", b =>
                 {
-                    b.HasOne("BookHaven.API.Models.Author", "Authors")
+                    b.HasOne("BookHaven.API.Models.Author", "Author")
                         .WithMany("Books")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -144,7 +140,7 @@ namespace BookHaven.API.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Authors");
+                    b.Navigation("Author");
 
                     b.Navigation("Category");
                 });

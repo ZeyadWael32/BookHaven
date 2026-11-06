@@ -26,7 +26,7 @@ public class CategoriesController : ApiControllerBase
     public async Task<ActionResult<PagedResponse<CategoryDto>>> GetCategories(
         CancellationToken cancellationToken,
         [FromQuery, Range(1, 100)] int pageSize = 10,
-        [FromQuery, Range(1, 100_000)] int pageNumber = 1)
+        [FromQuery, Range(1, int.MaxValue)] int pageNumber = 1)
     {
         var response = await _categoryService.GetPagedAsync(pageNumber, pageSize, cancellationToken);
         return Ok(response);

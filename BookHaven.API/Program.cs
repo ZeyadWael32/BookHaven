@@ -1,6 +1,7 @@
 using BookHaven.API;
 using BookHaven.API.Data;
 using BookHaven.API.Exceptions;
+using BookHaven.API.Infrastructure.Storage;
 using BookHaven.API.Repository;
 using BookHaven.API.Repository.IRepository;
 using BookHaven.API.Services;
@@ -39,6 +40,7 @@ builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+builder.Services.AddSingleton<IFileStorageService, LocalFileStorageService>();
 
 // AutoMapper
 builder.Services.AddAutoMapper(cfg =>
@@ -135,6 +137,7 @@ if (app.Environment.IsDevelopment())
         }));
 }
 
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 
 app.UseRouting();

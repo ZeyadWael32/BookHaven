@@ -1,7 +1,6 @@
-﻿namespace BookHaven.API.Data
+﻿namespace BookHaven.API.Data;
+
+public interface IDbInitializer
 {
-    public interface IDbInitializer
-    {
-        Task InitializeAsync();
-    }
+    Task InitializeAsync();
 }

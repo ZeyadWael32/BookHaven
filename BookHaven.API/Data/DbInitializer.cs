@@ -31,11 +31,11 @@ public class DbInitializer : IDbInitializer
         {
             await _db.Categories.AddRangeAsync(new List<Category>
             {
-                new() { Id = 1, Name = "Fiction" },
-                new() { Id = 2, Name = "Non-Fiction" },
-                new() { Id = 3, Name = "Science Fiction" },
-                new() { Id = 4, Name = "Fantasy" },
-                new() { Id = 5, Name = "Biography" }
+                new() { Name = "Fiction" },
+                new() { Name = "Non-Fiction" },
+                new() { Name = "Science Fiction" },
+                new() { Name = "Fantasy" },
+                new() { Name = "Biography" }
             });
             await _db.SaveChangesAsync();
         }
@@ -44,15 +44,25 @@ public class DbInitializer : IDbInitializer
         {
             await _db.Authors.AddRangeAsync(new List<Author>
             {
-                new() { Id = 1, Name = "Robert C. Martin" },
-                new() { Id = 2, Name = "J.K. Rowling" },
-                new() { Id = 3, Name = "Walter Isaacson" }
+                new() { Name = "Robert C. Martin" },
+                new() { Name = "J.K. Rowling" },
+                new() { Name = "Walter Isaacson" }
             });
             await _db.SaveChangesAsync();
         }
 
         if (!await _db.Books.AnyAsync())
         {
+            var fictionCategory = await _db.Categories.FirstAsync(c => c.Name == "Fiction");
+            var nonFictionCategory = await _db.Categories.FirstAsync(c => c.Name == "Non-Fiction");
+            var scienceFictionCategory = await _db.Categories.FirstAsync(c => c.Name == "Science Fiction");
+            var fantasyCategory = await _db.Categories.FirstAsync(c => c.Name == "Fantasy");
+            var biographyCategory = await _db.Categories.FirstAsync(c => c.Name == "Biography");
+
+            var author1 = await _db.Authors.FirstAsync(a => a.Name == "Robert C. Martin");
+            var author2 = await _db.Authors.FirstAsync(a => a.Name == "J.K. Rowling");
+            var author3 = await _db.Authors.FirstAsync(a => a.Name == "Walter Isaacson");
+
             var books = new List<Book>
             {
                 new()
@@ -61,11 +71,10 @@ public class DbInitializer : IDbInitializer
                     Isbn = "9780132350884",
                     PublishedYear = 2008,
                     Price = 45.99m,
-                    CategoryId = 2,
-                    AuthorId = 1,
+                    CategoryId = nonFictionCategory.Id,
+                    AuthorId = author1.Id,
                     Description = "A handbook of agile software craftsmanship that teaches developers how to write clean, maintainable code.",
-                    CoverImageUrl = "/images/placeholders/clean-code.jpg",
-                    ImageLocalPath = "wwwroot/images/placeholders/clean-code.jpg"
+                    CoverImageUrl = "https://placehold.co/600x400"
                 },
                 new()
                 {
@@ -73,11 +82,10 @@ public class DbInitializer : IDbInitializer
                     Isbn = "9780134494166",
                     PublishedYear = 2017,
                     Price = 39.95m,
-                    CategoryId = 2,
-                    AuthorId = 1,
+                    CategoryId = nonFictionCategory.Id,
+                    AuthorId = author1.Id,
                     Description = "A craftsman's guide to software structure and design, presenting universal rules of software architecture.",
-                    CoverImageUrl = "/images/placeholders/clean-architecture.jpg",
-                    ImageLocalPath = "wwwroot/images/placeholders/clean-architecture.jpg"
+                    CoverImageUrl = "https://placehold.co/600x400"
                 },
                 new()
                 {
@@ -85,11 +93,10 @@ public class DbInitializer : IDbInitializer
                     Isbn = "9780590353427",
                     PublishedYear = 1997,
                     Price = 14.99m,
-                    CategoryId = 4,
-                    AuthorId = 2,
+                    CategoryId = fantasyCategory.Id,
+                    AuthorId = author2.Id,
                     Description = "The first book in the legendary wizarding chronicle following a young boy who discovers his magical heritage.",
-                    CoverImageUrl = "/images/placeholders/harry-potter.jpg",
-                    ImageLocalPath = "wwwroot/images/placeholders/harry-potter.jpg"
+                    CoverImageUrl = "https://placehold.co/600x400",
                 },
                 new()
                 {
@@ -97,11 +104,10 @@ public class DbInitializer : IDbInitializer
                     Isbn = "9780439064873",
                     PublishedYear = 1998,
                     Price = 15.99m,
-                    CategoryId = 4,
-                    AuthorId = 2,
+                    CategoryId = fantasyCategory.Id,
+                    AuthorId = author2.Id,
                     Description = "The second book in the Harry Potter series, detailing his secondary year at Hogwarts School of Witchcraft and Wizardry.",
-                    CoverImageUrl = "/images/placeholders/chamber-of-secrets.jpg",
-                    ImageLocalPath = "wwwroot/images/placeholders/chamber-of-secrets.jpg"
+                    CoverImageUrl = "https://placehold.co/600x400",
                 },
                 new()
                 {
@@ -109,11 +115,10 @@ public class DbInitializer : IDbInitializer
                     Isbn = "9781451648539",
                     PublishedYear = 2011,
                     Price = 29.99m,
-                    CategoryId = 5,
-                    AuthorId = 3,
+                    CategoryId = biographyCategory.Id,
+                    AuthorId = author3.Id,
                     Description = "The exclusive, bestselling biography of Apple's co-founder, based on more than forty interviews with Jobs conducted over two years.",
-                    CoverImageUrl = "/images/placeholders/steve-jobs.jpg",
-                    ImageLocalPath = "wwwroot/images/placeholders/steve-jobs.jpg"
+                    CoverImageUrl = "https://placehold.co/600x400",
                 }
             };
 

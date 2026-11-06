@@ -21,7 +21,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(e => e.CategoryId).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(2000);
             entity.Property(e => e.CoverImageUrl).HasMaxLength(500);
-            entity.Property(e => e.ImageLocalPath).HasMaxLength(500);
             entity.Property(e => e.Price).IsRequired().HasColumnType("decimal(18,2)");
 
             entity.HasIndex(e => e.Isbn).IsUnique(); // Ensure ISBN is unique across all books for performance optimization and data integrity
@@ -31,7 +30,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                   .HasForeignKey(b => b.CategoryId)
                   .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of a category if it has associated books
 
-            entity.HasOne(b => b.Authors)
+            entity.HasOne(b => b.Author)
                   .WithMany(a => a.Books)
                   .HasForeignKey(b => b.AuthorId)
                   .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of an author if they have associated books

@@ -19,9 +19,6 @@ public class BookCreateDto
     public int CategoryId { get; set; }
     [StringLength(2000)]
     public string? Description { get; set; }
-    [StringLength(500)]
-    public string? CoverImageUrl { get; set; }
-    public IFormFile? CoverImage { get; set; }
     [Range(0.01, double.MaxValue, ErrorMessage = "Price must be a positive number.")]
     public decimal Price { get; set; }
 }
