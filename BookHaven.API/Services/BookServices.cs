@@ -135,15 +135,6 @@ public class BookService : IBookService
 
     #region File Storage Operations
 
-    private const long MaxFileSize = 5 * 1024 * 1024; // 5 MB
-
-    private static readonly Dictionary<string, byte[]> ImageSignatures = new(StringComparer.OrdinalIgnoreCase)
-    {
-        { ".jpg", new byte[] { 0xFF, 0xD8, 0xFF } },
-        { ".jpeg", new byte[] { 0xFF, 0xD8, 0xFF } },
-        { ".png", new byte[] { 0x89, 0x50, 0x4E, 0x47 } }
-    };
-
     private void DeleteLocalCoverImage(string? coverImageUrl)
     {
         if (!string.IsNullOrEmpty(coverImageUrl) && !ImageUrlHelper.IsExternalUrl(coverImageUrl))
