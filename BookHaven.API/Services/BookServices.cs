@@ -160,24 +160,11 @@ public class BookService : IBookService
             return ServiceResult<BookDto>.Failure(
                 ServiceErrorType.NotFound, "Book not found", "The book with the provided ID does not exist.");
 
-        if (file.Length == 0 || file.Length > MaxFileSize)
-            return ServiceResult<BookDto>.Failure(
-                ServiceErrorType.Validation, "Invalid file size", $"The file size must be between 1 byte and {MaxFileSize / (1024 * 1024)} MB.");
+        var (extension, errorMessage) = await ImageValidator.ValidateImageAsync(file, cancellationToken); // deconstructuring the tuple returned by ValidateImageAsync into extension and errorMessage
 
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-        if (!ImageSignatures.TryGetValue(extension, out var signature)) // compare file signature with the expected signature and out true if it matches
+        if (errorMessage is not null)
             return ServiceResult<BookDto>.Failure(
-                ServiceErrorType.Validation, "Invalid file type", "Only JPG, JPEG and PNG files are allowed.");
-
-        // check the real content of the file by reading the first few bytes and comparing it with the expected signature
-        await using (var stream = file.OpenReadStream()) // Open the file stream for reading
-        {
-            var header = new byte[signature.Length]; // Read the file header to validate the signature
-            var readBytes = await stream.ReadAsync(header, 0, header.Length, cancellationToken); // Read the header bytes
-            if (readBytes != signature.Length || !signature.SequenceEqual(header)) // Compare the read bytes with the expected signature
-                return ServiceResult<BookDto>.Failure(
-                    ServiceErrorType.Validation, "Invalid file content", "The file content does not match the expected format.");
-        }
+                ServiceErrorType.Validation, "Invalid file", errorMessage);
 
         var oldPath = book.CoverImageUrl;
 
