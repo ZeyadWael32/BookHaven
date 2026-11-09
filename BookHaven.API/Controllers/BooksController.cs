@@ -1,8 +1,5 @@
-﻿using AutoMapper;
-using BookHaven.API.Models;
-using BookHaven.API.Models.Dto;
+﻿using BookHaven.API.Models.Dto;
 using BookHaven.API.Models.Queries;
-using BookHaven.API.Repository.IRepository;
 using BookHaven.API.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +19,7 @@ public class BooksController : ApiControllerBase
     [HttpGet]
     [AllowAnonymous]
     [ResponseCache(CacheProfileName = "Default30")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BookDto),StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<PagedResponse<BookDto>>> GetBooks([FromQuery] BookQueryParameters query, CancellationToken cancellationToken)
@@ -33,7 +30,7 @@ public class BooksController : ApiControllerBase
 
     [HttpGet("{id:int}", Name = "GetBook")]
     [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BookDto),StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<BookDto>> GetBook(int id, CancellationToken cancellationToken)
@@ -68,7 +65,7 @@ public class BooksController : ApiControllerBase
 
     [HttpPut("{id:int}", Name = "UpdateBook")]
     [Authorize(Policy = "CatalogWriter")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BookDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -95,6 +92,43 @@ public class BooksController : ApiControllerBase
     public async Task<IActionResult> DeleteBook(int id, CancellationToken cancellationToken)
     {
         var result = await _bookService.DeleteAsync(id, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return ToErrorResponse(result);
+        }
+        return NoContent();
+    }
+
+    [HttpPost("{id:int}/cover")]
+    //[Authorize(Policy = "CatalogWriter")]
+    [Consumes("multipart/form-data")] // Specify that the endpoint consumes multipart/form-data
+    [RequestSizeLimit(5 * 1024 * 1024)] // Limit file size to 5 MB
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<BookDto>> UploadBookCover(int id, IFormFile cover, CancellationToken cancellationToken)
+    {
+        var result = await _bookService.UploadBookCoverAsync(id, cover, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return ToErrorResponse(result);
+        }
+        return Ok(result.Data);
+    }
+
+    [HttpDelete("{id:int}/cover")]
+    //[Authorize(Policy = "CatalogWriter")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DeleteBookCover(int id, CancellationToken cancellationToken)
+    {
+        var result = await _bookService.DeleteBookCoverAsync(id, cancellationToken);
         if (!result.IsSuccess)
         {
             return ToErrorResponse(result);

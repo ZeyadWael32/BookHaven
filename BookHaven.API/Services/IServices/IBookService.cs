@@ -10,4 +10,6 @@ public interface IBookService
     Task<ServiceResult<BookDto>> CreateAsync(BookCreateDto dto, CancellationToken cancellationToken);
     Task<ServiceResult<BookDto>> UpdateAsync(int id, BookUpdateDto dto, CancellationToken cancellationToken);
     Task<ServiceResult<bool>> DeleteAsync(int id, CancellationToken cancellationToken);
+    Task<ServiceResult<BookDto>> UploadBookCoverAsync(int id, IFormFile file, CancellationToken cancellationToken);
+    Task<ServiceResult<bool>> DeleteBookCoverAsync(int id, CancellationToken cancellationToken);
 }

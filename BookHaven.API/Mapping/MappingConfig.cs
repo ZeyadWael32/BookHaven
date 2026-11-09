@@ -2,7 +2,7 @@
 using BookHaven.API.Models;
 using BookHaven.API.Models.Dto;
 
-namespace BookHaven.API
+namespace BookHaven.API.Mapping
 {
     public class MappingConfig : Profile
     {

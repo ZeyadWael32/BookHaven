@@ -127,7 +127,7 @@ public class BookService : IBookService
 
         if (!string.IsNullOrEmpty(coverImagePath))
         {
-            _fileStorageService.Delete(coverImagePath); // Only after database deletion is successful, delete the cover image to avoid orphaned files
+            DeleteLocalCoverImage(coverImagePath); // Delete the cover image file only after the book has been successfully deleted from the database to avoid orphaned files
         }
 
         return ServiceResult<bool>.Success(true);
@@ -144,7 +144,15 @@ public class BookService : IBookService
         { ".png", new byte[] { 0x89, 0x50, 0x4E, 0x47 } }
     };
 
-    public async Task<ServiceResult<BookDto>> UploadCoverAsync(int id, IFormFile file, CancellationToken cancellationToken)
+    private void DeleteLocalCoverImage(string? coverImageUrl)
+    {
+        if (!string.IsNullOrEmpty(coverImageUrl) && !ImageUrlHelper.IsExternalUrl(coverImageUrl))
+        {
+            _fileStorageService.Delete(coverImageUrl);
+        }
+    }
+
+    public async Task<ServiceResult<BookDto>> UploadBookCoverAsync(int id, IFormFile file, CancellationToken cancellationToken)
     {
         var book = await _unitOfWork.Books.GetAsync(b => b.Id == id, tracked: true, cancellationToken: cancellationToken);
 
@@ -188,21 +196,21 @@ public class BookService : IBookService
         catch
         {
             // If saving to the database fails, delete the newly uploaded file to avoid orphaned files
-            _fileStorageService.Delete(newPath);
+            _fileStorageService.Delete(newPath); // always local path
             throw;
         }
 
         // if old path is null skip deletion, otherwise delete the old file
         if (!string.IsNullOrEmpty(oldPath)) 
         {
-            _fileStorageService.Delete(oldPath); // Only after database update is successful, delete the old file to avoid orphaned files
+            DeleteLocalCoverImage(oldPath); // Only after database update is successful, delete the old file to avoid orphaned files
         }
 
         var updatedBook = await _unitOfWork.Books.GetAsync(b => b.Id == id, tracked: false, includeProperties: "Author,Category", cancellationToken: cancellationToken);
         return ServiceResult<BookDto>.Success(_mapper.Map<BookDto>(updatedBook));
     }
 
-    public async Task<ServiceResult<bool>> DeleteCoverAsync(int id, CancellationToken cancellationToken)
+    public async Task<ServiceResult<bool>> DeleteBookCoverAsync(int id, CancellationToken cancellationToken)
     {
         var book = await _unitOfWork.Books.GetAsync(b => b.Id == id, tracked: true, cancellationToken: cancellationToken);
 
@@ -218,10 +226,10 @@ public class BookService : IBookService
 
         await _unitOfWork.Books.UpdateAsync(book, cancellationToken);
         await _unitOfWork.SaveAsync(cancellationToken);
-        _fileStorageService.Delete(oldPath); // Only after database update is successful, delete the old file to avoid orphaned files
+        DeleteLocalCoverImage(oldPath); // Only after database update is successful, delete the old file to avoid orphaned files
 
         return ServiceResult<bool>.Success(true);
     }
-    #endregion
 
+    #endregion
 }
