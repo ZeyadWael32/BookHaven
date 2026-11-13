@@ -2,6 +2,7 @@
 using BookHaven.API.Infrastructure.Storage;
 using BookHaven.API.Models;
 using BookHaven.API.Models.Dto;
+using BookHaven.API.Models.Dto.Author;
 using BookHaven.API.Repository.IRepository;
 using BookHaven.API.Services.IServices;
 
@@ -52,12 +53,6 @@ public class AuthorService : IAuthorService
     public async Task<ServiceResult<AuthorDto>> CreateAsync(
         AuthorCreateDto createDto, CancellationToken cancellationToken)
     {
-        if (await _unitOfWork.Authors.NameExistsAsync(createDto.Name, cancellationToken: cancellationToken))
-            return ServiceResult<AuthorDto>.Failure(
-                ServiceErrorType.Conflict,
-                "Author name already exists",
-                "An author with the provided name already exists.");
-
         var author = _mapper.Map<Author>(createDto);
         await _unitOfWork.Authors.CreateAsync(author, cancellationToken);
         await _unitOfWork.SaveAsync(cancellationToken);
@@ -119,7 +114,7 @@ public class AuthorService : IAuthorService
 
     #region File Storage Operations
 
-    public async Task<ServiceResult<AuthorDto>> UploadAuthorCoverAsync(int id, IFormFile file, CancellationToken cancellationToken)
+    public async Task<ServiceResult<AuthorDto>> UploadAuthorPictureAsync(int id, IFormFile file, CancellationToken cancellationToken)
     {
         var author = await _unitOfWork.Authors.GetAsync(a => a.Id == id, tracked: true, cancellationToken: cancellationToken);
 
@@ -160,7 +155,7 @@ public class AuthorService : IAuthorService
             _fileStorageService.Delete(oldPath); // Only after database update is successful, delete the old file to avoid orphaned files
         }
 
-        var updatedAuthor = await _unitOfWork.Authors.GetAsync(a => a.Id == id, tracked: false, includeProperties: "ProfileImage", cancellationToken: cancellationToken);
+        var updatedAuthor = await _unitOfWork.Authors.GetAsync(a => a.Id == id, tracked: false, cancellationToken: cancellationToken);
         return ServiceResult<AuthorDto>.Success(_mapper.Map<AuthorDto>(updatedAuthor));
     }
 

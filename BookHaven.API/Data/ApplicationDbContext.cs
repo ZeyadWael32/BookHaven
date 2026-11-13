@@ -8,6 +8,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Book> Books { get; set; } = null!;
     public DbSet<Category> Categories { get; set; } = null!;
     public DbSet<Author> Authors { get; set; } = null!;
+    public DbSet<ShoppingCart> ShoppingCarts { get; set; } = null!;
+    public DbSet<CartItem> CartItems { get; set; } = null!;
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -47,8 +49,30 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(e => e.Name).IsRequired().HasMaxLength(150);
             entity.Property(e => e.Biography).HasMaxLength(2000);
             entity.Property(e => e.ProfileImageUrl).HasMaxLength(500);
-            entity.Property(e => e.ImageLocalPath).HasMaxLength(500);
             entity.HasIndex(e => e.Name).IsUnique();
+        });
+
+        modelBuilder.Entity<ShoppingCart>(entity =>
+        {
+            entity.Property(e => e.UserId).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UpdatedAt).IsRequired();
+            entity.HasIndex(e => e.UserId).IsUnique(); // Ensure one shopping cart per user
+
+            entity.HasMany(sc => sc.Items)
+                  .WithOne(ci => ci.ShoppingCart)
+                  .HasForeignKey(ci => ci.ShoppingCartId)
+                  .OnDelete(DeleteBehavior.Cascade); // Cascade delete cart items when a shopping cart is deleted
+        });
+
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.Property(e => e.Quantity).IsRequired();
+            entity.HasIndex(e => new { e.ShoppingCartId, e.BookId }).IsUnique(); // Ensure one cart item per book in a shopping cart (composite unique index for book and shopping cart together)
+            entity.HasOne(ci => ci.Book)
+                  .WithMany()
+                  .HasForeignKey(ci => ci.BookId)
+                  .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of a book if it is in any cart
         });
     }
 }

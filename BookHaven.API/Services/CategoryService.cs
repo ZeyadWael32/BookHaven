@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BookHaven.API.Models;
 using BookHaven.API.Models.Dto;
+using BookHaven.API.Models.Dto.Category;
 using BookHaven.API.Repository.IRepository;
 using BookHaven.API.Services.IServices;
 

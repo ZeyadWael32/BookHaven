@@ -1,4 +1,5 @@
 ﻿using BookHaven.API.Models.Dto;
+using BookHaven.API.Models.Dto.Category;
 using BookHaven.API.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

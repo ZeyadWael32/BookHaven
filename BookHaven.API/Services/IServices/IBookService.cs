@@ -1,4 +1,5 @@
 ﻿using BookHaven.API.Models.Dto;
+using BookHaven.API.Models.Dto.Book;
 using BookHaven.API.Models.Queries;
 
 namespace BookHaven.API.Services.IServices;

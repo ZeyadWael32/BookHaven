@@ -1,4 +1,5 @@
 ﻿using BookHaven.API.Models.Dto;
+using BookHaven.API.Models.Dto.Book;
 using BookHaven.API.Models.Queries;
 using BookHaven.API.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
@@ -19,7 +20,7 @@ public class BooksController : ApiControllerBase
     [HttpGet]
     [AllowAnonymous]
     [ResponseCache(CacheProfileName = "Default30")]
-    [ProducesResponseType(typeof(BookDto),StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResponse<BookDto>),StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<PagedResponse<BookDto>>> GetBooks([FromQuery] BookQueryParameters query, CancellationToken cancellationToken)
@@ -100,18 +101,18 @@ public class BooksController : ApiControllerBase
     }
 
     [HttpPost("{id:int}/cover")]
-    //[Authorize(Policy = "CatalogWriter")]
+    [Authorize(Policy = "CatalogWriter")]
     [Consumes("multipart/form-data")] // Specify that the endpoint consumes multipart/form-data
-    [RequestSizeLimit(5 * 1024 * 1024)] // Limit file size to 5 MB
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [RequestSizeLimit(6 * 1024 * 1024)] // Limit request size to 6 MB
+    [ProducesResponseType(typeof(BookDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<BookDto>> UploadBookCover(int id, IFormFile cover, CancellationToken cancellationToken)
+    public async Task<ActionResult<BookDto>> UploadBookCover(int id, IFormFile file, CancellationToken cancellationToken)
     {
-        var result = await _bookService.UploadBookCoverAsync(id, cover, cancellationToken);
+        var result = await _bookService.UploadBookCoverAsync(id, file, cancellationToken);
         if (!result.IsSuccess)
         {
             return ToErrorResponse(result);
@@ -120,7 +121,7 @@ public class BooksController : ApiControllerBase
     }
 
     [HttpDelete("{id:int}/cover")]
-    //[Authorize(Policy = "CatalogWriter")]
+    [Authorize(Policy = "CatalogWriter")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

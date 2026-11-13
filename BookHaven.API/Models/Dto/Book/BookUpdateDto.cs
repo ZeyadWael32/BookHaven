@@ -1,9 +1,9 @@
 ﻿using BookHaven.API.Validation;
 using System.ComponentModel.DataAnnotations;
 
-namespace BookHaven.API.Models.Dto;
+namespace BookHaven.API.Models.Dto.Book;
 
-public class BookCreateDto
+public class BookUpdateDto
 {
     [Required]
     [StringLength(200)]

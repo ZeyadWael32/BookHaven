@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BookHaven.API.Models.Dto;
+namespace BookHaven.API.Models.Dto.Author;
 
 public class AuthorCreateDto
 {

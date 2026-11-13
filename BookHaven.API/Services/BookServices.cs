@@ -2,6 +2,7 @@
 using BookHaven.API.Infrastructure.Storage;
 using BookHaven.API.Models;
 using BookHaven.API.Models.Dto;
+using BookHaven.API.Models.Dto.Book;
 using BookHaven.API.Models.Queries;
 using BookHaven.API.Repository.IRepository;
 using BookHaven.API.Services.IServices;

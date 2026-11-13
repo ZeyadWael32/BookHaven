@@ -1,4 +1,4 @@
-﻿namespace BookHaven.API.Models.Dto;
+﻿namespace BookHaven.API.Models.Dto.Book;
 
 public class BookDto
 {
