@@ -9,12 +9,14 @@ public class UnitOfWork : IUnitOfWork
     public IBookRepository Books { get; private set; }
     public ICategoryRepository Categories { get; private set; }
     public IAuthorRepository Authors { get; private set; }
+    public ICartRepository Carts { get; private set; }
     public UnitOfWork(ApplicationDbContext context)
     {
         _context = context;
         Books = new BookRepository(_context);
         Categories = new CategoryRepository(_context);
         Authors = new AuthorRepository(_context);
+        Carts = new CartRepository(_context);
     }
 
     public async Task<int> SaveAsync(CancellationToken cancellationToken = default)
