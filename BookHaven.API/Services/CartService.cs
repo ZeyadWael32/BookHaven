@@ -139,6 +139,6 @@ public class CartService : ICartService
             await _unitOfWork.SaveAsync(cancellationToken);
         }
 
-        return ServiceResult<ShoppingCartDto>.Success(new ShoppingCartDto());
+        return ServiceResult<ShoppingCartDto>.Success(await GetCartAsync(userId, cancellationToken));
     }
 }
