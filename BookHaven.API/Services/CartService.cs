@@ -20,7 +20,7 @@ public class CartService : ICartService
 
     public async Task<ShoppingCartDto> GetCartAsync(string userId, CancellationToken cancellationToken)
     {
-        var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId, tracked: true, cancellationToken: cancellationToken);
+        var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId, cancellationToken: cancellationToken);
         if (cart is null)
         {
             return new ShoppingCartDto(); // Return an empty cart DTO if the cart is not found (not created in the database yet)

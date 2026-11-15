@@ -10,6 +10,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Author> Authors { get; set; } = null!;
     public DbSet<ShoppingCart> ShoppingCarts { get; set; } = null!;
     public DbSet<CartItem> CartItems { get; set; } = null!;
+    public DbSet<OrderHeader> OrderHeaders { get; set; } = null!;
+    public DbSet<OrderDetail> OrderDetails { get; set; } = null!;
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -73,6 +75,34 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                   .WithMany()
                   .HasForeignKey(ci => ci.BookId)
                   .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of a book if it is in any cart
+        });
+
+        modelBuilder.Entity<OrderHeader>(e =>
+        {
+            e.HasIndex(o => o.UserId);
+            e.Property(o => o.UserId).HasMaxLength(100).IsRequired();
+            e.Property(o => o.OrderTotal).HasColumnType("decimal(18,2)");
+            e.Property(o => o.OrderStatus).HasConversion<string>().HasMaxLength(20);
+            e.Property(o => o.PaymentStatus).HasConversion<string>().HasMaxLength(20);
+            e.Property(o => o.RecipientName).HasMaxLength(100);
+            e.Property(o => o.PhoneNumber).HasMaxLength(30);
+            e.Property(o => o.StreetAddress).HasMaxLength(200);
+            e.Property(o => o.City).HasMaxLength(100);
+            e.Property(o => o.State).HasMaxLength(100);
+            e.Property(o => o.PostalCode).HasMaxLength(20);
+            e.HasMany(o => o.OrderDetails)
+             .WithOne(d => d.OrderHeader)
+             .HasForeignKey(d => d.OrderHeaderId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<OrderDetail>(e =>
+        {
+            e.Property(d => d.UnitPrice).HasColumnType("decimal(18,2)");
+            e.HasOne(d => d.Book)
+             .WithMany()
+             .HasForeignKey(d => d.BookId)
+             .OnDelete(DeleteBehavior.Restrict);   // books in past orders can't be deleted
         });
     }
 }

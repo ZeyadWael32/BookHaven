@@ -4,6 +4,7 @@ using BookHaven.API.Models.Dto.Author;
 using BookHaven.API.Models.Dto.Book;
 using BookHaven.API.Models.Dto.CartItem;
 using BookHaven.API.Models.Dto.Category;
+using BookHaven.API.Models.Dto.Order;
 using BookHaven.API.Models.Dto.ShoppingCart;
 
 namespace BookHaven.API.Mapping;
@@ -41,5 +42,13 @@ public class MappingConfig : Profile
             .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.Book.Price));
 
         CreateMap<ShoppingCart, ShoppingCartDto>();
+
+        CreateMap<OrderDetail, OrderDetailDto>()
+            .ForMember(dest => dest.BookTitle, opt => opt.MapFrom(src => src.Book.Title))
+            .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Book.Author.Name))
+            .ForMember(dest => dest.CoverImageUrl, opt => opt.MapFrom(src => src.Book.CoverImageUrl));
+
+        CreateMap<OrderHeader, OrderDto>()
+            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.OrderDetails));
     }
 }
