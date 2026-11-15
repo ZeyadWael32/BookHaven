@@ -20,7 +20,7 @@ public class CartService : ICartService
 
     public async Task<ShoppingCartDto> GetCartAsync(string userId, CancellationToken cancellationToken)
     {
-        var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId, cancellationToken: cancellationToken);
+        var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId, tracked: true, cancellationToken: cancellationToken);
         if (cart is null)
         {
             return new ShoppingCartDto(); // Return an empty cart DTO if the cart is not found (not created in the database yet)
@@ -35,7 +35,7 @@ public class CartService : ICartService
             return ServiceResult<ShoppingCartDto>.Failure(
                 ServiceErrorType.Validation, "Invalid book", "The provided book ID is invalid.");
 
-        var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId, cancellationToken: cancellationToken);
+        var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId, tracked: true, cancellationToken: cancellationToken);
         if (cart is null)
         {
             cart = new ShoppingCart
@@ -84,7 +84,7 @@ public class CartService : ICartService
 
     public async Task<ServiceResult<ShoppingCartDto>> UpdateCartItemAsync(string userId, int bookId, CartItemUpdateDto updateDto, CancellationToken cancellationToken)
     {
-        var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId, cancellationToken: cancellationToken);
+        var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId, tracked: true, cancellationToken: cancellationToken);
 
         if (cart is null)
             return ServiceResult<ShoppingCartDto>.Failure(
@@ -105,7 +105,7 @@ public class CartService : ICartService
 
     public async Task<ServiceResult<ShoppingCartDto>> RemoveItemFromCartAsync(string userId, int bookId, CancellationToken cancellationToken)
     {
-        var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId, cancellationToken: cancellationToken);
+        var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId, tracked: true, cancellationToken: cancellationToken);
 
         if (cart is null)
             return ServiceResult<ShoppingCartDto>.Failure(
@@ -126,7 +126,7 @@ public class CartService : ICartService
 
     public async Task<ServiceResult<ShoppingCartDto>> ClearCartAsync(string userId, CancellationToken cancellationToken)
     {
-        var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId, cancellationToken: cancellationToken);
+        var cart = await _unitOfWork.Carts.GetCartByUserIdAsync(userId, tracked: true, cancellationToken: cancellationToken);
 
         if (cart is null)
             return ServiceResult<ShoppingCartDto>.Failure(

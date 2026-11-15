@@ -12,7 +12,7 @@ public class CartRepository : Repository<ShoppingCart, string>, ICartRepository
     {
         _db = db;
     }
-    public async Task<ShoppingCart?> GetCartByUserIdAsync(string userId, bool tracked = false, CancellationToken cancellationToken = default)
+    public async Task<ShoppingCart?> GetCartByUserIdAsync(string userId, bool tracked = true, CancellationToken cancellationToken = default)
     {
         IQueryable<ShoppingCart> query = _db.ShoppingCarts;
 
