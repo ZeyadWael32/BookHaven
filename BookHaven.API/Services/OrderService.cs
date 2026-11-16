@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using BookHaven.API.Models;
 using BookHaven.API.Models.Dto.Order;
-using BookHaven.API.Repository;
 using BookHaven.API.Repository.IRepository;
 using BookHaven.API.Services.IServices;
 using BookHaven.Utility;
@@ -60,23 +59,103 @@ public class OrderService : IOrderService
 
         await _unitOfWork.SaveAsync(cancellationToken);
 
-        var created = await _unitOfWork.Orders.GetOrderForUserAsync(order.Id, userId, tracked: false, cancellationToken);
+        var created = await _unitOfWork.Orders.GetOrderByUserIdAsync(order.Id, userId, tracked: false, cancellationToken);
 
         return ServiceResult<OrderDto>.Success(_mapper.Map<OrderDto>(created));
     }
 
-    public async Task<IEnumerable<OrderDto>> GetUserOrdersAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<OrderDto>> GetOrdersByUserIdAsync(string userId, CancellationToken cancellationToken = default)
     {
         var orders = await _unitOfWork.Orders.GetOrdersByUserIdAsync(userId, tracked: false, cancellationToken);
         return _mapper.Map<IEnumerable<OrderDto>>(orders);
     }
 
-    public async Task<OrderDto?> GetUserOrderByIdAsync(int orderId, string userId, CancellationToken cancellationToken = default)
+    public async Task<OrderDto?> GetOrderByUserIdAsync(int orderId, string userId, CancellationToken cancellationToken = default)
     {
-        var order = await _unitOfWork.Orders.GetOrderForUserAsync(orderId, userId, tracked: false, cancellationToken);
+        var order = await _unitOfWork.Orders.GetOrderByUserIdAsync(orderId, userId, tracked: false, cancellationToken);
         if (order is null)
             return null;
 
         return _mapper.Map<OrderDto>(order);
+    }
+
+    public async Task<ServiceResult<OrderDto>> ProcessOrderAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var order = await _unitOfWork.Orders.GetOrderByIdAsync(id, tracked: true, cancellationToken: cancellationToken);
+        if (order is null)
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.NotFound, "Order not found.", $"No order found with ID {id}.");
+        }
+
+        if (order.OrderStatus != SD.OrderStatus.Pending)
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Invalid order status.", $"Order with ID {id} cannot be processed because it is not in a pending state.");
+        }
+
+        order.OrderStatus = SD.OrderStatus.Processing;
+        await _unitOfWork.SaveAsync(cancellationToken);
+
+        return ServiceResult<OrderDto>.Success(_mapper.Map<OrderDto>(order));
+    }
+
+    public async Task<ServiceResult<OrderDto>> ShipOrderAsync(int id, ShipOrderDto dto, CancellationToken cancellationToken = default)
+    {
+        var order = await _unitOfWork.Orders.GetOrderByIdAsync(id, tracked: true, cancellationToken: cancellationToken);
+        if (order is null)
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.NotFound, "Order not found.", $"No order found with ID {id}.");
+        }
+        if (order.OrderStatus != SD.OrderStatus.Processing)
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Invalid order status.", $"Order with ID {id} cannot be shipped because it is not in a processing state.");
+        }
+        order.OrderStatus = SD.OrderStatus.Shipped;
+        order.ShippingDate = DateTime.UtcNow;
+        order.TrackingNumber = dto.TrackingNumber?.Trim();
+        order.Carrier = dto.Carrier?.Trim();
+        await _unitOfWork.SaveAsync(cancellationToken);
+
+        return ServiceResult<OrderDto>.Success(_mapper.Map<OrderDto>(order));
+    }
+
+    public async Task<ServiceResult<OrderDto>> DeliverOrderAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var order = await _unitOfWork.Orders.GetOrderByIdAsync(id, tracked: true, cancellationToken: cancellationToken);
+        if (order is null)
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.NotFound, "Order not found.", $"No order found with ID {id}.");
+        }
+        if (order.OrderStatus != SD.OrderStatus.Shipped)
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Invalid order status.", $"Order with ID {id} cannot be marked as delivered because it is not in a shipped state.");
+        }
+        order.OrderStatus = SD.OrderStatus.Delivered;
+        await _unitOfWork.SaveAsync(cancellationToken);
+        return ServiceResult<OrderDto>.Success(_mapper.Map<OrderDto>(order));
+    }
+
+    public async Task<ServiceResult<OrderDto>> CancelOrderAsync(int id, string userId, CancellationToken cancellationToken = default)
+    {
+        var order = await _unitOfWork.Orders.GetOrderByIdAsync(id, tracked: true, cancellationToken: cancellationToken);
+        if (order is null)
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.NotFound, "Order not found.", $"No order found with ID {id}.");
+        }
+        if (order.UserId != userId)
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Forbidden, "Unauthorized action.", $"User with ID {userId} is not authorized to cancel order with ID {id}.");
+        }
+        if (order.OrderStatus is SD.OrderStatus.Delivered or SD.OrderStatus.Cancelled or SD.OrderStatus.Shipped)
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Invalid order status.", $"Order with ID {id} cannot be cancelled because it is already delivered or cancelled.");
+        }
+        if (order.PaymentStatus is SD.PaymentStatus.Paid) 
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Payment already made.", $"Order with ID {id} cannot be cancelled because payment has already been made.");
+        }
+
+        order.OrderStatus = SD.OrderStatus.Cancelled;
+        await _unitOfWork.SaveAsync(cancellationToken);
+        return ServiceResult<OrderDto>.Success(_mapper.Map<OrderDto>(order));
     }
 }

@@ -11,7 +11,21 @@ public class OrderRepository : Repository<OrderHeader, int>, IOrderRepository
     {
         _db = db;
     }
-    public async Task<OrderHeader?> GetOrderForUserAsync(int orderId, string userId, bool tracked = false, CancellationToken cancellationToken = default)
+
+    public async Task<OrderHeader?> GetOrderByIdAsync(int orderId, bool tracked = false, CancellationToken cancellationToken = default)
+    {
+        IQueryable<OrderHeader> query = _db.OrderHeaders;
+
+        if (!tracked)
+            query = query.AsNoTracking();
+
+        query = query.Include(o => o.OrderDetails)
+                     .ThenInclude(od => od.Book)
+                     .ThenInclude(b => b.Author);
+
+        return await query.FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
+    }
+    public async Task<OrderHeader?> GetOrderByUserIdAsync(int orderId, string userId, bool tracked = false, CancellationToken cancellationToken = default)
     {
         IQueryable<OrderHeader> query = _db.OrderHeaders;
 

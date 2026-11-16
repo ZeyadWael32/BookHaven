@@ -92,8 +92,8 @@ builder.Services
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("CatalogWriter", policy =>
-        policy.RequireRole("catalog-writer"));
+    options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("Customer", policy => policy.RequireRole("Customer, Admin"));
 });
 
 // Swagger / OpenAPI

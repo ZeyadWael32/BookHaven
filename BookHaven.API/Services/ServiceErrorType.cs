@@ -5,5 +5,6 @@ public enum ServiceErrorType
     None,
     NotFound,
     Validation,
-    Conflict
+    Conflict,
+    Forbidden
 }
