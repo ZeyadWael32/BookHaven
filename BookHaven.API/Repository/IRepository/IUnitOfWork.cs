@@ -6,6 +6,7 @@ public interface IUnitOfWork
     ICategoryRepository Categories { get; }
     IAuthorRepository Authors { get; }
     ICartRepository Carts { get; }
+    IOrderRepository Orders { get; }
 
     Task<int> SaveAsync(CancellationToken cancellationToken = default); // returns the number of state entries written to the database (int)
 }
