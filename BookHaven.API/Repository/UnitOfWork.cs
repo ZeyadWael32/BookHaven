@@ -10,6 +10,7 @@ public class UnitOfWork : IUnitOfWork
     public ICategoryRepository Categories { get; private set; }
     public IAuthorRepository Authors { get; private set; }
     public ICartRepository Carts { get; private set; }
+    public IOrderRepository Orders { get; private set; }
     public UnitOfWork(ApplicationDbContext context)
     {
         _context = context;
@@ -17,6 +18,7 @@ public class UnitOfWork : IUnitOfWork
         Categories = new CategoryRepository(_context);
         Authors = new AuthorRepository(_context);
         Carts = new CartRepository(_context);
+        Orders = new OrderRepository(_context);
     }
 
     public async Task<int> SaveAsync(CancellationToken cancellationToken = default)
