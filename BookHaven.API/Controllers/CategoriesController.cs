@@ -9,6 +9,7 @@ namespace BookHaven.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Policy = "Customer")]
 public class CategoriesController : ApiControllerBase
 {
     private readonly ICategoryService _categoryService;
@@ -19,7 +20,6 @@ public class CategoriesController : ApiControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
     [ResponseCache(CacheProfileName = "Default30")]
     [ProducesResponseType(typeof(PagedResponse<CategoryDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -34,7 +34,6 @@ public class CategoriesController : ApiControllerBase
     }
 
     [HttpGet("{id:int}", Name = "GetCategory")]
-    [AllowAnonymous]
     [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -48,7 +47,7 @@ public class CategoriesController : ApiControllerBase
     }
 
     [HttpPost]
-    [Authorize(Policy = "CatalogWriter")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -66,8 +65,9 @@ public class CategoriesController : ApiControllerBase
         return CreatedAtRoute("GetCategory", new { id = result.Data!.Id }, result.Data);
     }
 
-    [HttpPut("{id:int}", Name = "UpdateCategory")]
-    [Authorize(Policy = "CatalogWriter")]
+
+    [HttpPut("admin/{id:int}", Name = "UpdateCategory")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(typeof(CategoryDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -86,8 +86,8 @@ public class CategoriesController : ApiControllerBase
         return Ok(result.Data);
     }
 
-    [HttpDelete("{id:int}")]
-    [Authorize(Policy = "CatalogWriter")]
+    [HttpDelete("admin/{id:int}")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

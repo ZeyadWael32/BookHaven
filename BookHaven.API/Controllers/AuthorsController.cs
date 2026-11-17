@@ -9,6 +9,7 @@ namespace BookHaven.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Policy = "Customer")]
 public class AuthorsController : ApiControllerBase
 {
     private readonly IAuthorService _authorService;
@@ -19,7 +20,6 @@ public class AuthorsController : ApiControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
     [ResponseCache(CacheProfileName = "Default30")]
     [ProducesResponseType(typeof(PagedResponse<AuthorDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -34,7 +34,6 @@ public class AuthorsController : ApiControllerBase
     }
 
     [HttpGet("{id:int}", Name = "GetAuthor")]
-    [AllowAnonymous]
     [ProducesResponseType(typeof(AuthorDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -47,8 +46,8 @@ public class AuthorsController : ApiControllerBase
         return Ok(author);
     }
 
-    [HttpPost]
-    [Authorize(Policy = "CatalogWriter")]
+    [HttpPost("admin/create")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(typeof(AuthorDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -66,8 +65,8 @@ public class AuthorsController : ApiControllerBase
         return CreatedAtRoute("GetAuthor", new { id = result.Data!.Id }, result.Data);
     }
 
-    [HttpPut("{id:int}", Name = "UpdateAuthor")]
-    [Authorize(Policy = "CatalogWriter")]
+    [HttpPut("admin/{id:int}", Name = "UpdateAuthor")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(typeof(AuthorDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -86,8 +85,8 @@ public class AuthorsController : ApiControllerBase
         return Ok(result.Data);
     }
 
-    [HttpDelete("{id:int}")]
-    [Authorize(Policy = "CatalogWriter")]
+    [HttpDelete("admin/{id:int}")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -104,8 +103,8 @@ public class AuthorsController : ApiControllerBase
         return NoContent();
     }
 
-    [HttpPost("{id:int}/picture")]
-    [Authorize(Policy = "CatalogWriter")]
+    [HttpPost("admin/{id:int}/picture")]
+    [Authorize(Policy = "Admin")]
     [Consumes("multipart/form-data")] // Specify that the endpoint consumes multipart/form-data
     [RequestSizeLimit(6 * 1024 * 1024)] // Limit request size to 6 MB
     [ProducesResponseType(typeof(AuthorDto), StatusCodes.Status200OK)]
@@ -124,8 +123,8 @@ public class AuthorsController : ApiControllerBase
         return Ok(result.Data);
     }
 
-    [HttpDelete("{id:int}/picture")]
-    [Authorize(Policy = "CatalogWriter")]
+    [HttpDelete("admin/{id:int}/picture")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

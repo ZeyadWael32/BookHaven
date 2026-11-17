@@ -22,6 +22,12 @@ public class OrdersController : ApiControllerBase
 
 
     [HttpPost]
+    [ProducesResponseType(typeof(OrderDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] OrderCreateDto dto, CancellationToken cancellationToken = default)
     {
        if (UserId is null)
@@ -35,6 +41,11 @@ public class OrdersController : ApiControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<OrderDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders(CancellationToken cancellationToken = default)
     {
         if (UserId is null)
@@ -48,6 +59,12 @@ public class OrdersController : ApiControllerBase
     }
 
     [HttpGet("{id:int}", Name = "GetOrder")]
+    [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<OrderDto?>> GetOrder(int id, CancellationToken cancellationToken = default)
     {
         if (UserId is null)
@@ -61,6 +78,13 @@ public class OrdersController : ApiControllerBase
     }
 
     [HttpPost("{id:int}/cancel")]
+    [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<OrderDto>> Cancel(int id, CancellationToken cancellationToken = default)
     {
         if (UserId is null)
@@ -75,6 +99,12 @@ public class OrdersController : ApiControllerBase
 
     [HttpGet("admin/all")]
     [Authorize(Policy = "Admin")]
+    [ProducesResponseType(typeof(IEnumerable<OrderDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IEnumerable<OrderDto>>> GetAllOrders([FromQuery] SD.OrderStatus? status, CancellationToken cancellationToken = default)
     {
         var result = await _orderService.GetAllOrdersAsync(status, cancellationToken);
@@ -87,6 +117,13 @@ public class OrdersController : ApiControllerBase
 
     [HttpPost("admin/{id:int}/process")]
     [Authorize(Policy = "Admin")]
+    [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<OrderDto>> Process(int id, CancellationToken cancellationToken = default)
     {
         var result = await _orderService.ProcessOrderAsync(id, cancellationToken);
@@ -99,6 +136,13 @@ public class OrdersController : ApiControllerBase
 
     [HttpPost("admin/{id:int}/ship")]
     [Authorize(Policy = "Admin")]
+    [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<OrderDto>> Ship(int id, [FromBody] ShipOrderDto dto, CancellationToken cancellationToken = default)
     {
         var result = await _orderService.ShipOrderAsync(id, dto, cancellationToken);
@@ -111,6 +155,13 @@ public class OrdersController : ApiControllerBase
 
     [HttpPost("admin/{id:int}/deliver")]
     [Authorize(Policy = "Admin")]
+    [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<OrderDto>> Deliver(int id, CancellationToken cancellationToken = default)
     {
         var result = await _orderService.DeliverOrderAsync(id, cancellationToken);
@@ -123,6 +174,13 @@ public class OrdersController : ApiControllerBase
 
     [HttpPost("admin/{id:int}/cancel")]
     [Authorize(Policy = "Admin")]
+    [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<OrderDto>> AdminCancel(int id, CancellationToken cancellationToken = default)
     {
         var result = await _orderService.AdminCancelOrderAsync(id, cancellationToken);

@@ -9,6 +9,7 @@ namespace BookHaven.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Policy = "Customer")]
 public class BooksController : ApiControllerBase
 {
     private readonly IBookService _bookService;
@@ -18,7 +19,6 @@ public class BooksController : ApiControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
     [ResponseCache(CacheProfileName = "Default30")]
     [ProducesResponseType(typeof(PagedResponse<BookDto>),StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -30,7 +30,6 @@ public class BooksController : ApiControllerBase
     }
 
     [HttpGet("{id:int}", Name = "GetBook")]
-    [AllowAnonymous]
     [ProducesResponseType(typeof(BookDto),StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -44,8 +43,8 @@ public class BooksController : ApiControllerBase
         return Ok(book);
     }
 
-    [HttpPost]
-    [Authorize(Policy = "CatalogWriter")]
+    [HttpPost("admin/create")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -64,8 +63,8 @@ public class BooksController : ApiControllerBase
         return CreatedAtRoute("GetBook", new { id = result.Data!.Id }, result.Data);
     }
 
-    [HttpPut("{id:int}", Name = "UpdateBook")]
-    [Authorize(Policy = "CatalogWriter")]
+    [HttpPut("admin/{id:int}", Name = "UpdateBook")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(typeof(BookDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -83,8 +82,8 @@ public class BooksController : ApiControllerBase
         return Ok(result.Data);
     }
 
-    [HttpDelete("{id:int}")]
-    [Authorize(Policy = "CatalogWriter")]
+    [HttpDelete("admin/{id:int}")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -100,8 +99,8 @@ public class BooksController : ApiControllerBase
         return NoContent();
     }
 
-    [HttpPost("{id:int}/cover")]
-    [Authorize(Policy = "CatalogWriter")]
+    [HttpPost("admin/{id:int}/cover")]
+    [Authorize(Policy = "Admin")]
     [Consumes("multipart/form-data")] // Specify that the endpoint consumes multipart/form-data
     [RequestSizeLimit(6 * 1024 * 1024)] // Limit request size to 6 MB
     [ProducesResponseType(typeof(BookDto), StatusCodes.Status200OK)]
@@ -120,8 +119,9 @@ public class BooksController : ApiControllerBase
         return Ok(result.Data);
     }
 
-    [HttpDelete("{id:int}/cover")]
-    [Authorize(Policy = "CatalogWriter")]
+
+    [HttpDelete("admin/{id:int}/cover")]
+    [Authorize(Policy = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
