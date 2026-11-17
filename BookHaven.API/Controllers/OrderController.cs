@@ -40,6 +40,10 @@ public class OrdersController : ApiControllerBase
         if (UserId is null)
             return Unauthorized();
         var result = await _orderService.GetOrdersByUserIdAsync(UserId, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return ToErrorResponse(result);
+        }
         return Ok(result.Data);
     }
 
@@ -49,6 +53,19 @@ public class OrdersController : ApiControllerBase
         if (UserId is null)
             return Unauthorized();
         var result = await _orderService.GetOrderByUserIdAsync(id, UserId, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return ToErrorResponse(result);
+        }
+        return Ok(result.Data);
+    }
+
+    [HttpPost("{id:int}/cancel")]
+    public async Task<ActionResult<OrderDto>> Cancel(int id, CancellationToken cancellationToken = default)
+    {
+        if (UserId is null)
+            return Unauthorized();
+        var result = await _orderService.CancelOrderAsync(id, UserId, cancellationToken: cancellationToken);
         if (!result.IsSuccess)
         {
             return ToErrorResponse(result);
@@ -104,12 +121,11 @@ public class OrdersController : ApiControllerBase
         return Ok(result.Data);
     }
 
-    [HttpPost("{id:int}/cancel")]
-    public async Task<ActionResult<OrderDto>> Cancel(int id, CancellationToken cancellationToken = default)
+    [HttpPost("admin/{id:int}/cancel")]
+    [Authorize(Policy = "Admin")]
+    public async Task<ActionResult<OrderDto>> AdminCancel(int id, CancellationToken cancellationToken = default)
     {
-        if (UserId is null)
-            return Unauthorized();
-        var result = await _orderService.CancelOrderAsync(id, UserId, cancellationToken: cancellationToken);
+        var result = await _orderService.AdminCancelOrderAsync(id, cancellationToken);
         if (!result.IsSuccess)
         {
             return ToErrorResponse(result);

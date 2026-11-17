@@ -72,16 +72,43 @@ public class OrderService : IOrderService
         return ServiceResult<IEnumerable<OrderDto>>.Success(_mapper.Map<IEnumerable<OrderDto>>(orders));
     }
 
-    public async Task<ServiceResult<OrderDto?>> GetOrderByUserIdAsync(int orderId, string userId, CancellationToken cancellationToken = default)
+    public async Task<ServiceResult<OrderDto?>> GetOrderByUserIdAsync(int id, string userId, CancellationToken cancellationToken = default)
     {
-        var order = await _unitOfWork.Orders.GetOrderByUserIdAsync(orderId, userId, tracked: false, cancellationToken);
+        var order = await _unitOfWork.Orders.GetOrderByUserIdAsync(id, userId, tracked: false, cancellationToken);
         if (order is null)
-            return ServiceResult<OrderDto?>.Failure(ServiceErrorType.NotFound, "Order not found.", $"No order found with ID {orderId}.");
+            return ServiceResult<OrderDto?>.Failure(ServiceErrorType.NotFound, "Order not found.", $"No order found with ID {id}.");
 
         return ServiceResult<OrderDto?>.Success(_mapper.Map<OrderDto?>(order));
     }
 
-    public async Task<ServiceResult<IEnumerable<OrderDto>>> GetAllOrdersAsync(SD.OrderStatus? status = null, CancellationToken cancellationToken = default) // Admin only
+    public async Task<ServiceResult<OrderDto>> CancelOrderAsync(int id, string userId, CancellationToken cancellationToken = default)
+    {
+        var order = await _unitOfWork.Orders.GetOrderByIdAsync(id, tracked: true, cancellationToken: cancellationToken);
+        if (order is null)
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.NotFound, "Order not found.", $"No order found with ID {id}.");
+        }
+        if (order.UserId != userId)
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Forbidden, "Unauthorized action.", $"User with ID {userId} is not authorized to cancel order with ID {id}.");
+        }
+        if (order.OrderStatus != SD.OrderStatus.Pending)
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Order cannot be cancelled.", $"Order with ID {id} can only be cancelled while it is in a pending state.");
+        }
+        if (order.PaymentStatus is SD.PaymentStatus.Paid)
+        {
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Payment already made.", $"Order with ID {id} cannot be cancelled because payment has already been made.");
+        }
+
+        order.OrderStatus = SD.OrderStatus.Cancelled;
+        await _unitOfWork.SaveAsync(cancellationToken);
+        return ServiceResult<OrderDto>.Success(_mapper.Map<OrderDto>(order));
+    }
+
+    #region Admin Methods
+
+    public async Task<ServiceResult<IEnumerable<OrderDto>>> GetAllOrdersAsync(SD.OrderStatus? status = null, CancellationToken cancellationToken = default)
     {
         var orders = await _unitOfWork.Orders.GetAllOrdersAsync(status, tracked: false, cancellationToken);
         if (orders is null || !orders.Any())
@@ -147,29 +174,21 @@ public class OrderService : IOrderService
         await _unitOfWork.SaveAsync(cancellationToken);
         return ServiceResult<OrderDto>.Success(_mapper.Map<OrderDto>(order));
     }
-
-    public async Task<ServiceResult<OrderDto>> CancelOrderAsync(int id, string userId, CancellationToken cancellationToken = default)
+    
+    public async Task<ServiceResult<OrderDto>> AdminCancelOrderAsync(int id, CancellationToken cancellationToken = default)
     {
         var order = await _unitOfWork.Orders.GetOrderByIdAsync(id, tracked: true, cancellationToken: cancellationToken);
         if (order is null)
         {
             return ServiceResult<OrderDto>.Failure(ServiceErrorType.NotFound, "Order not found.", $"No order found with ID {id}.");
         }
-        if (order.UserId != userId)
-        {
-            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Forbidden, "Unauthorized action.", $"User with ID {userId} is not authorized to cancel order with ID {id}.");
-        }
-        if (order.OrderStatus != SD.OrderStatus.Pending)
-        {
-            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Order cannot be cancelled.", $"Order with ID {id} can only be cancelled while it is in a pending state.");
-        }
-        if (order.PaymentStatus is SD.PaymentStatus.Paid) 
-        {
-            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Payment already made.", $"Order with ID {id} cannot be cancelled because payment has already been made.");
-        }
+        if (order.OrderStatus != SD.OrderStatus.Pending && order.OrderStatus != SD.OrderStatus.Processing)
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Order cannot be cancelled.", $"Order with ID {id} can only be cancelled while it is in a pending or processing state.");
 
         order.OrderStatus = SD.OrderStatus.Cancelled;
         await _unitOfWork.SaveAsync(cancellationToken);
         return ServiceResult<OrderDto>.Success(_mapper.Map<OrderDto>(order));
     }
+
+    #endregion
 }
