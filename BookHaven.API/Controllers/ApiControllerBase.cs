@@ -11,6 +11,7 @@ public abstract class ApiControllerBase : ControllerBase
         {
             ServiceErrorType.NotFound => StatusCodes.Status404NotFound,
             ServiceErrorType.Conflict => StatusCodes.Status409Conflict,
+            ServiceErrorType.Forbidden => StatusCodes.Status403Forbidden,
             _ => StatusCodes.Status400BadRequest // Default to bad request
         };
 
