@@ -30,12 +30,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddResponseCaching();
 
-
-// Repositories
-builder.Services.AddScoped<IBookRepository, BookRepository>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
-
 // Services
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
