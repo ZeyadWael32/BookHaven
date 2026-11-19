@@ -80,6 +80,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<OrderHeader>(e =>
         {
             e.HasIndex(o => o.UserId);
+            e.HasIndex(o => o.PaymentIntentId).IsUnique().HasFilter("[PaymentIntentId] IS NOT NULL");  // Ensure unique PaymentIntentId for orders that have been processed, allowing nulls for orders not yet processed
             e.Property(o => o.UserId).HasMaxLength(100).IsRequired();
             e.Property(o => o.OrderTotal).HasColumnType("decimal(18,2)");
             e.Property(o => o.OrderStatus).HasConversion<string>().HasMaxLength(20);
@@ -90,6 +91,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             e.Property(o => o.City).HasMaxLength(100);
             e.Property(o => o.State).HasMaxLength(100);
             e.Property(o => o.PostalCode).HasMaxLength(20);
+            e.Property(o => o.StripeSessionId).HasMaxLength(200);
+            e.Property(o => o.PaymentIntentId).HasMaxLength(200);
             e.HasMany(o => o.OrderDetails)
              .WithOne(d => d.OrderHeader)
              .HasForeignKey(d => d.OrderHeaderId)

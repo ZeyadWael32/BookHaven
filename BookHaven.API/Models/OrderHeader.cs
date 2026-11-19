@@ -24,6 +24,9 @@ public class OrderHeader
     public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
     public DateTime? PaymentDate { get; set; }
 
+    public string? StripeSessionId { get; set; }
+    public string? PaymentIntentId { get; set; }
+
     public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 }
 
