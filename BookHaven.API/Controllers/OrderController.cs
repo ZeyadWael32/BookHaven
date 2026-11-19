@@ -30,7 +30,7 @@ public class OrdersController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] OrderCreateDto dto, CancellationToken cancellationToken = default)
     {
-       if (UserId is null)
+        if (UserId is null)
             return Unauthorized();
         var result = await _orderService.CreateOrderFromCartAsync(UserId, dto, cancellationToken);
         if (!result.IsSuccess)
