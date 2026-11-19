@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using BookHaven.API.Models.Dto.Payment;
+﻿using BookHaven.API.Models.Dto.Payment;
 using BookHaven.API.Repository.IRepository;
 using BookHaven.API.Services.IServices;
 using BookHaven.Utility;
@@ -11,13 +10,11 @@ namespace BookHaven.API.Services;
 public class PaymentService : IPaymentService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly IConfiguration _config;
 
-    public PaymentService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration config)
+    public PaymentService(IUnitOfWork unitOfWork, IConfiguration config)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _config = config;
     }
 
@@ -36,7 +33,25 @@ public class PaymentService : IPaymentService
             return ServiceResult<CheckoutSessionDto>.Failure(
                 ServiceErrorType.Validation, "Empty order.", "The order has no items to process for payment.");
 
+
+        if (!string.IsNullOrEmpty(order.StripeSessionId))
+        {
+            var existingSession = await new SessionService().GetAsync(order.StripeSessionId, cancellationToken: cancellationToken);
+
+            // If the existing session is still open, return its URL instead of creating a new session
+            if (existingSession.Status == "open")
+                return ServiceResult<CheckoutSessionDto>.Success(new CheckoutSessionDto { Url = existingSession.Url });
+
+            // If the existing session is complete or expired, we can create a new session
+            if (existingSession.Status == "complete")
+                return ServiceResult<CheckoutSessionDto>.Failure(
+                    ServiceErrorType.Validation, "Payment already completed.", "The payment for this order has already been completed.");
+        }
+
         var frontendBaseUrl = _config["Stripe:FrontendBaseUrl"];
+
+        if (string.IsNullOrWhiteSpace(frontendBaseUrl))
+            throw new InvalidOperationException("Frontend base URL is not configured. Please set 'Stripe:FrontendBaseUrl' in the configuration.");
 
         var options = new SessionCreateOptions
         {
@@ -54,7 +69,7 @@ public class PaymentService : IPaymentService
                 PriceData = new SessionLineItemPriceDataOptions
                 {
                     Currency = "usd",
-                    UnitAmount = (long)(d.UnitPrice * 100), // Stripe expects the amount in cents
+                    UnitAmount = decimal.ToInt64(decimal.Round(d.UnitPrice * 100m, 0, MidpointRounding.AwayFromZero)), // Convert to cents and round to avoid floating-point issues
                     ProductData = new SessionLineItemPriceDataProductDataOptions
                     {
                         Name = d.Book.Title
@@ -72,25 +87,45 @@ public class PaymentService : IPaymentService
 
     public async Task HandleEventAsync(Event stripeEvent, CancellationToken cancellationToken = default)
     {
-        if (stripeEvent.Data.Object is not Session session) 
-            return; // If the event is not a checkout session, exit the method
+        // Only handle checkout session events
+        if (stripeEvent.Type != EventTypes.CheckoutSessionCompleted && 
+            stripeEvent.Type != EventTypes.CheckoutSessionAsyncPaymentSucceeded && 
+            stripeEvent.Type != EventTypes.CheckoutSessionAsyncPaymentFailed)
+            return;
 
+        // If the event is not a checkout session, exit the method
+        if (stripeEvent.Data.Object is not Session session) 
+            return; 
+
+        // If the order ID is not present or invalid, exit the method
         if (!session.Metadata.TryGetValue("orderId", out var orderIdStr) || !int.TryParse(orderIdStr, out var orderId))
-                return; // If the order ID is not present or invalid, exit the method
+                return; 
 
             var order = await _unitOfWork.Orders.GetOrderByIdAsync(orderId, tracked: true, cancellationToken: cancellationToken);
             if (order is null)
                 throw new InvalidOperationException($"Order with ID {orderId} not found.");
 
-            switch (stripeEvent.Type)
+            // Ensure the event corresponds to the correct order and session
+            if (session.Id != order.StripeSessionId || session.ClientReferenceId != order.Id.ToString())
+                    return;
+
+        switch (stripeEvent.Type)
             {
                 case EventTypes.CheckoutSessionCompleted:
                 case EventTypes.CheckoutSessionAsyncPaymentSucceeded:
                     if (session.PaymentStatus != "paid") return; // Ensure the payment was successful
-                    if (order.PaymentStatus == SD.PaymentStatus.Paid) return; // If the order is already marked as paid, no further action is needed
+                    if (order.PaymentStatus == SD.PaymentStatus.Paid)
+                    {
+                        // If the order is already marked as paid, we can check if it was cancelled and needs a refund
+                        if (order.OrderStatus == SD.OrderStatus.Cancelled)
+                            await RefundAsync(order, cancellationToken);
+                    }
 
-                    if (session.AmountTotal != (long)Math.Round(order.OrderTotal * 100m))
-                    throw new InvalidOperationException($"Payment amount mismatch for order {orderId}");
+                    if (session.Currency != "usd")
+                        throw new InvalidOperationException($"Unexpected currency for order {orderId}: {session.Currency}");
+
+                    if (session.AmountTotal != decimal.ToInt64(decimal.Round(order.OrderTotal * 100m, 0, MidpointRounding.AwayFromZero)))
+                        throw new InvalidOperationException($"Payment amount mismatch for order {orderId}");
 
                     order.PaymentStatus = SD.PaymentStatus.Paid;
                     order.PaymentDate = DateTime.UtcNow;
@@ -99,10 +134,8 @@ public class PaymentService : IPaymentService
                     await _unitOfWork.SaveAsync(cancellationToken);
 
                     if (order.OrderStatus == SD.OrderStatus.Cancelled)
-                    {
                         await RefundAsync(order, cancellationToken);
-                        await _unitOfWork.SaveAsync(cancellationToken);
-                    }
+
                     break;
 
                 case EventTypes.CheckoutSessionAsyncPaymentFailed:
@@ -120,10 +153,10 @@ public class PaymentService : IPaymentService
         if (string.IsNullOrEmpty(order.PaymentIntentId))
             throw new InvalidOperationException("Cannot process refund: PaymentIntentId is missing for the order.");
 
-        if (order.PaymentStatus != SD.PaymentStatus.Paid)
-            throw new InvalidOperationException("Cannot process refund: Order is not in a paid state.");
+        if (order.PaymentStatus != SD.PaymentStatus.Paid && order.PaymentStatus != SD.PaymentStatus.RefundPending)
+            throw new InvalidOperationException("Cannot process refund: Order is not in a paid or refund pending state.");
 
-        await new RefundService().CreateAsync(new RefundCreateOptions
+        var refund = await new RefundService().CreateAsync(new RefundCreateOptions
         {
             PaymentIntent = order.PaymentIntentId,
             Reason = RefundReasons.RequestedByCustomer
@@ -131,7 +164,20 @@ public class PaymentService : IPaymentService
         new RequestOptions { IdempotencyKey = $"refund-order-{order.Id}" },
         cancellationToken: cancellationToken);
 
-        order.PaymentStatus = SD.PaymentStatus.Refunded;
+        if (refund.Status == "succeeded")
+        {
+            order.PaymentStatus = SD.PaymentStatus.Refunded; 
+        }
+        else if (refund.Status == "pending")
+        {
+            order.PaymentStatus = SD.PaymentStatus.RefundPending;
+
+        }
+        else
+        {
+            throw new InvalidOperationException($"Refund failed for order {order.Id}. Refund status: {refund.Status}");
+        }
+
         await _unitOfWork.SaveAsync(cancellationToken);
     }
 }
