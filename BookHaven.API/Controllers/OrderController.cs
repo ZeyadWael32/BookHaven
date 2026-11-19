@@ -1,4 +1,5 @@
 ﻿using BookHaven.API.Models.Dto.Order;
+using BookHaven.API.Models.Dto.Payment;
 using BookHaven.API.Services;
 using BookHaven.API.Services.IServices;
 using BookHaven.Utility;
@@ -13,11 +14,13 @@ namespace BookHaven.API.Controllers;
 public class OrdersController : ApiControllerBase
 {
     private readonly IOrderService _orderService;
+    private readonly IPaymentService _paymentService;
     private string? UserId => User.FindFirst("sub")?.Value; 
 
-    public OrdersController(IOrderService orderService)
+    public OrdersController(IOrderService orderService, IPaymentService paymentService)
     {
         _orderService = orderService;
+        _paymentService = paymentService;
     }
 
 
@@ -90,6 +93,22 @@ public class OrdersController : ApiControllerBase
         if (UserId is null)
             return Unauthorized();
         var result = await _orderService.CancelOrderAsync(id, UserId, cancellationToken: cancellationToken);
+        if (!result.IsSuccess)
+        {
+            return ToErrorResponse(result);
+        }
+        return Ok(result.Data);
+    }
+
+    [HttpPost("{id:int}/checkout")]
+    [ProducesResponseType(typeof(CheckoutSessionDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<CheckoutSessionDto>> Checkout(int id, CancellationToken cancellationToken = default)
+    {
+        if (UserId is null)
+            return Unauthorized();
+        var result = await _paymentService.CreateCheckoutSessionAsync(id, UserId, cancellationToken);
         if (!result.IsSuccess)
         {
             return ToErrorResponse(result);

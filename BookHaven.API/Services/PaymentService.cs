@@ -118,10 +118,16 @@ public class PaymentService : IPaymentService
                     {
                         // If the order is already marked as paid, we can check if it was cancelled and needs a refund
                         if (order.OrderStatus == SD.OrderStatus.Cancelled)
+                        {
                             await RefundAsync(order, cancellationToken);
+                            return;
+                        }
                     }
+                // If the order is marked as refunded or refund pending, we don't need to process it again
+                if (order.PaymentStatus == SD.PaymentStatus.RefundPending || order.PaymentStatus == SD.PaymentStatus.Refunded)
+                        return;
 
-                    if (session.Currency != "usd")
+                if (session.Currency != "usd")
                         throw new InvalidOperationException($"Unexpected currency for order {orderId}: {session.Currency}");
 
                     if (session.AmountTotal != decimal.ToInt64(decimal.Round(order.OrderTotal * 100m, 0, MidpointRounding.AwayFromZero)))

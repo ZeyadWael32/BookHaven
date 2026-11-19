@@ -4,18 +4,21 @@ using BookHaven.API.Models.Dto.Order;
 using BookHaven.API.Repository.IRepository;
 using BookHaven.API.Services.IServices;
 using BookHaven.Utility;
+using Stripe;
 
 namespace BookHaven.API.Services;
 
 public class OrderService : IOrderService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IPaymentService _paymentService;
     private readonly IMapper _mapper;
 
-    public OrderService(IUnitOfWork unitOfWork, IMapper mapper)
+    public OrderService(IUnitOfWork unitOfWork, IMapper mapper, IPaymentService paymentService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _paymentService = paymentService;
     }
 
     public async Task<ServiceResult<OrderDto>> CreateOrderFromCartAsync(string userId, OrderCreateDto orderCreateDto, CancellationToken cancellationToken = default)
@@ -168,16 +171,28 @@ public class OrderService : IOrderService
         await _unitOfWork.SaveAsync(cancellationToken);
         return ServiceResult<OrderDto>.Success(_mapper.Map<OrderDto>(order));
     }
-    
+
     public async Task<ServiceResult<OrderDto>> AdminCancelOrderAsync(int id, CancellationToken cancellationToken = default)
     {
         var order = await _unitOfWork.Orders.GetOrderByIdAsync(id, tracked: true, cancellationToken: cancellationToken);
         if (order is null)
             return ServiceResult<OrderDto>.Failure(ServiceErrorType.NotFound, "Order not found.", $"No order found with ID {id}.");
-        if (order.PaymentStatus == SD.PaymentStatus.Paid)
-            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Payment already made.", $"Order with ID {id} cannot be cancelled until payment is refunded.");
+
         if (order.OrderStatus != SD.OrderStatus.Pending && order.OrderStatus != SD.OrderStatus.Processing)
-            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Order cannot be cancelled.", $"Order with ID {id} can only be cancelled while it is in a pending or processing state.");
+            return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Order cannot be cancelled.",
+                $"Order with ID {id} can only be cancelled while it is pending or processing.");
+
+        if (order.PaymentStatus == SD.PaymentStatus.Paid)
+        {
+            try
+            {
+                await _paymentService.RefundAsync(order, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<OrderDto>.Failure(ServiceErrorType.Conflict, "Refund failed.", $"Order with ID {id} could not be refunded: {ex.Message}");
+            }
+        }
 
         order.OrderStatus = SD.OrderStatus.Cancelled;
         await _unitOfWork.SaveAsync(cancellationToken);
