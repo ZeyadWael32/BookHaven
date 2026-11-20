@@ -113,7 +113,7 @@ public class PaymentService : IPaymentService
             {
                 case EventTypes.CheckoutSessionCompleted:
                 case EventTypes.CheckoutSessionAsyncPaymentSucceeded:
-                    if (session.PaymentStatus != "paid") return; // Ensure the payment was successful
+                    if (stripeEvent.Type == EventTypes.CheckoutSessionCompleted && session.PaymentStatus != "paid") return; // Ensure the payment was successful
                     if (order.PaymentStatus == SD.PaymentStatus.Paid)
                     {
                         // If the order is already marked as paid, we can check if it was cancelled and needs a refund
